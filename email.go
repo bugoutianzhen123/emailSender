@@ -12,16 +12,16 @@ type EmailSender interface {
 	SendEmail(to []string, subject string, body string) error
 }
 
-type Email struct {
-	Smtp      string `yaml:"Smtp"`
-	Port      string `yaml:"Port"`
-	From      string `yaml:"From"`
-	From_code string `yaml:"From_code"`
+type email struct {
+	Smtp      string `yaml:"Smtp"`      //smtp 地址
+	Port      string `yaml:"Port"`      //端口
+	From      string `yaml:"From"`      //用于发送邮件的邮箱
+	From_code string `yaml:"From_code"` //授权码
 }
 
-// 手动配置
+// 手动配置发送邮件所需的信息
 func InitEmail(smtp string, port string, from string, from_code string) EmailSender {
-	return &Email{
+	return &email{
 		Smtp:      smtp,
 		Port:      port,
 		From:      from,
@@ -29,13 +29,19 @@ func InitEmail(smtp string, port string, from string, from_code string) EmailSen
 	}
 }
 
-// 有viper
+// 当程序利用viper读取配置文件时，可以利用此函数快速船舰
+// email:
+//
+//	Smtp    : "smtp.email.com"
+//	Port    : "port"
+//	From      : "email@example.com"
+//	From_code : "authorize_code"
 func InitEmailWithViper() EmailSender {
-	var e Email
+	var e email
 	if err := viper.UnmarshalKey("email", &e); err != nil {
 		panic(err)
 	}
-	return &Email{
+	return &email{
 		Smtp:      e.Smtp,
 		Port:      e.Port,
 		From:      e.From,
@@ -43,12 +49,27 @@ func InitEmailWithViper() EmailSender {
 	}
 }
 
-func (e *Email) SendEmail(to []string, subject string, body string) error {
+// 发送邮件
+// to: 目标邮箱，
+// subject: 主题
+// body: 内容，可以是string，也可以是完整等等html
+func (e *email) SendEmail(to []string, subject string, body string) error {
 	// 设置邮件头部信息
 	fromHeader := fmt.Sprintf("From: %s\r\n", e.From)
 	toHeader := fmt.Sprintf("To: %s\r\n", strings.Join(to, ","))
 	subjectHeader := fmt.Sprintf("Subject: %s\r\n", subject)
-	message := fromHeader + toHeader + subjectHeader + "\r\n" + body
+
+	// 判断body是否为HTML
+	var contentTypeHeader string
+	if isHTML(body) {
+		contentTypeHeader = "Content-Type: text/html; charset=UTF-8\r\n"
+		fmt.Println("Content-Type: text/html; charset=UTF-8")
+	} else {
+		contentTypeHeader = "Content-Type: text/plain; charset=UTF-8\r\n"
+		fmt.Println("Content-Type: text/plain; charset=UTF-8")
+	}
+
+	message := fromHeader + toHeader + subjectHeader + contentTypeHeader + "\r\n" + body
 
 	// 使用SMTP认证
 	auth := smtp.PlainAuth("", e.From, e.From_code, e.Smtp)
@@ -98,4 +119,11 @@ func (e *Email) SendEmail(to []string, subject string, body string) error {
 	wc.Close()
 
 	return nil
+}
+
+func isHTML(body string) bool {
+	// 简单检查是否包含 HTML 或 SVG 标签
+	return strings.Contains(body, "<html>") || strings.Contains(body, "<body>") ||
+		strings.Contains(body, "<p>") || strings.Contains(body, "<h1>") ||
+		strings.Contains(body, "<svg>") || strings.Contains(body, "<path>")
 }
