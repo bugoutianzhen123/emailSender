@@ -78,19 +78,19 @@ func CheckConfig(emailConfig *EmailConfig) error {
 }
 
 type OneSender struct {
-	To      string
-	Subject string
-	Body    string
+	To      string `json:"to"`
+	Subject string `json:"subject"`
+	Body    string `json:"body"`
 }
 
 type Senders struct {
-	Sends []OneSender
+	Sends []OneSender `json:"sends"`
 }
 
 type SenderSame struct {
-	To      []string
-	Subject string
-	Body    string
+	To      []string `json:"tos"`
+	Subject string   `json:"subject"`
+	Body    string   `json:"body"`
 }
 
 func NewOneSender(s *OneSender) EmailSender { return s }
