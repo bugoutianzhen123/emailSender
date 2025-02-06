@@ -158,11 +158,6 @@ func (s *Senders) SendEmail() error {
 		return fmt.Errorf("Error authenticating: %v", err)
 	}
 
-	//设置发件人
-	if err := conn.Mail(config.From); err != nil {
-		return fmt.Errorf("Error setting sender: %v", err)
-	}
-
 	for _, e := range s.Sends {
 		if err := e.send(conn); err != nil {
 			fmt.Errorf("Error sending email to %s: %v", e.To, err)
