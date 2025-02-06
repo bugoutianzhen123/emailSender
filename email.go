@@ -125,6 +125,11 @@ func (s *OneSender) SendEmail() error {
 		return fmt.Errorf("Error authenticating: %v", err)
 	}
 
+	//设置发件人
+	if err := conn.Mail(config.From); err != nil {
+		return fmt.Errorf("Error setting sender: %v", err)
+	}
+
 	if err := s.send(conn); err != nil {
 		return fmt.Errorf("Error sending email to %s: %v", s.To, err)
 	}
@@ -156,6 +161,11 @@ func (s *Senders) SendEmail() error {
 	// 进行身份验证
 	if err := conn.Auth(auth); err != nil {
 		return fmt.Errorf("Error authenticating: %v", err)
+	}
+
+	//设置发件人
+	if err := conn.Mail(config.From); err != nil {
+		return fmt.Errorf("Error setting sender: %v", err)
 	}
 
 	for _, e := range s.Sends {
@@ -257,10 +267,7 @@ func (s *OneSender) send(conn *smtp.Client) error {
 	// 构造邮件正文
 	message := fromHeader + toHeader + subjectHeader + contentTypeHeader + "\r\n" + s.Body
 
-	// 设置发件人和收件人
-	if err := conn.Mail(config.From); err != nil {
-		return fmt.Errorf("Error setting sender: %v", err)
-	}
+	// 设置收件人
 	if err := conn.Rcpt(s.To); err != nil {
 		return fmt.Errorf("Error setting recipient: %v", err)
 	}
