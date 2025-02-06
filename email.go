@@ -170,6 +170,9 @@ func (s *Senders) SendEmail() error {
 			fmt.Println(e, err)
 			continue
 		}
+		if err := conn.Reset(); err != nil {
+			return fmt.Errorf("Error resetting connection: %v", err)
+		}
 	}
 
 	return nil
@@ -263,10 +266,9 @@ func (s *OneSender) send(conn *smtp.Client) error {
 	message := fromHeader + toHeader + subjectHeader + contentTypeHeader + "\r\n" + s.Body
 
 	//设置发件人
-	conn.Mail(config.From)
-	//if err := conn.Mail(config.From); err != nil {
-	//	return fmt.Errorf("Error setting sender: %v", err)
-	//}
+	if err := conn.Mail(config.From); err != nil {
+		return fmt.Errorf("Error setting sender: %v", err)
+	}
 
 	// 设置收件人
 	if err := conn.Rcpt(s.To); err != nil {
