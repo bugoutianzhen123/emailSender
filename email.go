@@ -162,7 +162,7 @@ func (s *Senders) SendEmail() error {
 		if err := e.send(conn); err != nil {
 			fmt.Errorf("Error sending email to %s: %v", e.To, err)
 			//记录发送失败的邮件与错误信息，再异步处理
-			//fmt.Println(e, err)
+			fmt.Println(e, err)
 			continue
 		}
 	}
