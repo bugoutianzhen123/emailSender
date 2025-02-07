@@ -170,20 +170,12 @@ func (s *OneSender) send(conn *smtp.Client) error {
 
 	//设置发件人
 	if err := conn.Mail(config.From); err != nil {
-		if strings.Contains(err.Error(), "250") {
-			fmt.Println("Warning: RCPT TO returned 250 OK (ignored)")
-		} else {
-			return fmt.Errorf("Error setting sender: %v", err)
-		}
+		return fmt.Errorf("Error setting sender: %v", err)
 	}
 
 	// 设置收件人
 	if err := conn.Rcpt(s.To); err != nil {
-		if strings.Contains(err.Error(), "250") {
-			fmt.Println("Warning: RCPT TO returned 250 OK (ignored)")
-		} else {
-			return fmt.Errorf("Error setting sender: %v", err)
-		}
+		return fmt.Errorf("Error setting sender: %v", err)
 	}
 	// 发送邮件正文
 	wc, err := conn.Data()
