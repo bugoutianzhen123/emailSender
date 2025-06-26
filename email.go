@@ -82,6 +82,8 @@ type OneSender struct {
 	To      string `json:"to"`
 	Subject string `json:"subject"`
 	Body    string `json:"body"`
+	IfHaveFile bool     `json:"if_file"`
+	Files      []File   `json:"files"`
 }
 
 type Senders struct {
@@ -92,6 +94,13 @@ type SenderSame struct {
 	To      []string `json:"tos"`
 	Subject string   `json:"subject"`
 	Body    string   `json:"body"`
+	IfHaveFile bool     `json:"if_file"`
+	Files      []File   `json:"files"`
+}
+
+type File struct {
+	FileName string `json:"file_name"`
+	Content  []byte `json:"content"`
 }
 
 func (s *OneSender) SendEmail() error {
